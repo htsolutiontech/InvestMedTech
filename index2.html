@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MedTech -Tính toán tài chính</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#eef3f8;
+  --bg-soft:#f7fafd;
+  --card:#ffffff;
+  --card-2:#fbfdff;
+  --line:#d7e2ee;
+  --line-strong:#c4d3e4;
+  --text:#0f2238;
+  --muted:#61748c;
+  --primary:#123b6d;
+  --primary-2:#1f5fa8;
+  --primary-3:#eaf2fb;
+  --teal:#0f766e;
+  --teal-soft:#e9f7f5;
+  --green:#15803d;
+  --green-soft:#ecfdf3;
+  --gold:#b7791f;
+  --gold-soft:#fff6e8;
+  --red:#c24141;
+  --red-soft:#fdf0f0;
+  --shadow-sm:0 4px 14px rgba(15,34,56,.06);
+  --shadow:0 12px 34px rgba(15,34,56,.09);
+  --shadow-lg:0 20px 50px rgba(15,34,56,.14);
+  --radius:18px;
+  --radius-sm:14px;
+  --content-max:1440px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{margin:0;padding:0;font-family:Inter,system-ui,sans-serif;background:linear-gradient(180deg,#f4f8fc 0%, var(--bg) 100%);color:var(--text)}
+body{min-height:100vh;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:inherit}
+.header{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,#0d2746 0%, #123b6d 45%, #1d5ca0 100%);color:#fff;padding:16px 24px;box-shadow:0 10px 30px rgba(9,23,42,.22);backdrop-filter:blur(8px)}
+.header-wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;max-width:var(--content-max);margin:0 auto}
+.brand{min-width:0}
+.brand h1{margin:0;font-size:clamp(20px,2vw,28px);font-weight:800;letter-spacing:-.03em;line-height:1.15}
+.brand p{margin:6px 0 0;color:#c7d7eb;font-size:13px;line-height:1.45;max-width:900px}
+.actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px}
+.btn{border:none;border-radius:12px;padding:11px 16px;font-weight:700;font-size:13px;cursor:pointer;transition:.2s ease;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;white-space:nowrap}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:#14b8a6;color:#fff;box-shadow:0 8px 20px rgba(20,184,166,.25)}
+.btn-primary:hover{background:#0f9f90}
+.btn-secondary{background:rgba(255,255,255,.10);color:#fff;border:1px solid rgba(255,255,255,.18)}
+.btn-secondary:hover{background:rgba(255,255,255,.16)}
+.btn-light{background:#fff;color:var(--primary);box-shadow:0 6px 18px rgba(255,255,255,.14)}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:22px;max-width:var(--content-max);margin:0 auto;padding:22px}
+.sidebar{position:sticky;top:94px;height:calc(100vh - 116px);overflow:auto;padding-right:2px}
+.sidebar::-webkit-scrollbar{width:8px}.sidebar::-webkit-scrollbar-thumb{background:#d7e2ee;border-radius:999px}
+.panel{background:linear-gradient(180deg,var(--card) 0%, var(--card-2) 100%);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.panel + .panel{margin-top:16px}
+.panel-head{padding:18px 18px 0 18px}
+.panel-head h2,.panel-head h3{margin:0;font-size:16px;letter-spacing:-.01em}
+.panel-head p{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+.panel-body{padding:18px}
+.nav{display:grid;gap:6px}
+.nav a{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;color:var(--text);text-decoration:none;font-size:14px;font-weight:700;transition:.18s ease;border:1px solid transparent}
+.nav a:hover,.nav a.active{background:var(--primary-3);color:var(--primary);border-color:#d7e7fb}
+.dot{width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 3px rgba(18,59,109,.08)}
+.kpi-mini{padding:14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#fff,#f8fbff)}
+.kpi-mini + .kpi-mini{margin-top:10px}
+.kpi-mini .label{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.kpi-mini .value{font-size:22px;font-weight:800;margin-top:6px;line-height:1.1;word-break:break-word}
+.kpi-mini .note{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.45}
+.main{min-width:0}
+.main .hero{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(320px,.82fr);gap:18px;margin-bottom:18px}
+.hero-card,.scenario-box{padding:22px}
+.hero-card h2{margin:0;font-size:clamp(24px,2vw,30px);letter-spacing:-.03em;line-height:1.18}
+.hero-card p{margin:10px 0 0;color:var(--muted);line-height:1.7;font-size:14px}
+.hero-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:18px}
+.stat{padding:16px;background:linear-gradient(180deg,#fbfdff,#f4f8fd);border:1px solid var(--line);border-radius:16px;min-width:0}
+.stat .label{font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.stat .value{font-size:24px;font-weight:800;margin-top:8px;line-height:1.1}
+.stat .sub{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.45}
+.scenario-box h3{margin:0;font-size:18px}
+.toggle-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.pill{padding:9px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:800;cursor:pointer;transition:.18s ease}
+.pill.active{background:var(--primary-3);border-color:#bfd8fb;color:var(--primary)}
+.grid-2,.grid-3,.grid-4{display:grid;gap:14px}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.section{margin-bottom:18px;scroll-margin-top:92px}
+.section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 0}
+.section-head h3{margin:0;font-size:20px;letter-spacing:-.02em}
+.section-head p{margin:6px 0 0;font-size:13px;color:var(--muted);line-height:1.55}
+.section-body{padding:18px 20px 20px}
+.form-card{padding:18px;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:var(--shadow-sm);min-width:0}
+.form-card h4{margin:0 0 14px;font-size:15px;letter-spacing:-.01em}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;line-height:1.4}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line-strong);border-radius:12px;padding:11px 12px;font-size:14px;color:var(--text);background:#fff;outline:none;transition:.16s ease;min-height:44px}
+.field textarea{resize:vertical;min-height:96px}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#8cb8eb;box-shadow:0 0 0 4px rgba(31,95,168,.10)}
+.unit{position:relative}
+.unit span{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);font-weight:800}
+.unit input{padding-right:72px}
+.kpi-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.kpi{padding:16px;border-radius:16px;border:1px solid var(--line);background:linear-gradient(180deg,#fff,#f7fbff);min-width:0}
+.kpi .label{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;line-height:1.45}
+.kpi .value{font-size:22px;font-weight:800;margin-top:8px;line-height:1.1;word-break:break-word}
+.kpi .note{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.45}
+.value.green{color:var(--green)} .value.red{color:var(--red)} .value.gold{color:var(--gold)} .value.primary{color:var(--primary)}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:var(--shadow-sm)}
+.table-wrap::-webkit-scrollbar{height:10px}.table-wrap::-webkit-scrollbar-thumb{background:#d7e2ee;border-radius:999px}
+table{width:100%;border-collapse:collapse;min-width:860px}
+th,td{padding:12px 14px;border-bottom:1px solid #e9eef6;text-align:left;font-size:13px;vertical-align:top}
+th{position:sticky;top:0;background:#f7faff;color:#51637c;font-size:11px;text-transform:uppercase;letter-spacing:.05em;z-index:1}
+tr:last-child td{border-bottom:none}
+tr.total td{font-weight:800;background:#f6fbff}
+.badge{display:inline-block;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:800;line-height:1.4}
+.badge.blue{background:var(--primary-3);color:var(--primary)} .badge.green{background:var(--green-soft);color:var(--green)} .badge.gold{background:var(--gold-soft);color:var(--gold)} .badge.red{background:var(--red-soft);color:var(--red)}
+.note-box{padding:14px 16px;border-radius:14px;border-left:4px solid var(--primary);background:#eef6ff;color:#25415f;font-size:13px;line-height:1.7}
+.note-box.warn{background:var(--gold-soft);border-left-color:var(--gold);color:#7c5310}
+.note-box.error{background:var(--red-soft);border-left-color:var(--red);color:#7a1f1f}
+.bars{display:grid;gap:12px}
+.bar{display:grid;grid-template-columns:minmax(120px,160px) minmax(180px,1fr) 110px;gap:12px;align-items:center}
+.bar > div:first-child{font-size:13px;font-weight:700;line-height:1.45}
+.bar .track{height:14px;background:#edf2f8;border-radius:999px;overflow:hidden}
+.bar .fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#1a70d6,#12b981)}
+.metric-split{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.metric-split .item{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#fff,#f8fbff)}
+.metric-split .item .label{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;line-height:1.45}
+.metric-split .item .value{font-size:20px;font-weight:800;margin-top:8px;line-height:1.1}
+.metric-split .item .sub{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.45}
+.sensitivity-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.sensitivity-card{padding:16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#f8fbff);box-shadow:var(--shadow-sm)}
+.sensitivity-card h4{margin:0;font-size:14px;letter-spacing:-.01em}
+.sensitivity-card p{margin:8px 0 0;font-size:12px;color:var(--muted);line-height:1.6}
+.sensitivity-card .big{font-size:24px;font-weight:800;margin-top:12px;line-height:1.1}
+.footer-space{height:40px}
+.report-only{display:none}
+.mobile-anchor-bar{display:none}
+@media (max-width:1280px){
+  .layout{grid-template-columns:270px minmax(0,1fr);gap:18px;padding:18px}
+  .hero-grid,.kpi-row,.grid-4,.metric-split,.sensitivity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:1024px){
+  .header{padding:14px 18px}
+  .header-wrap{align-items:flex-start;flex-direction:column}
+  .actions{width:100%;justify-content:flex-start}
+  .layout{grid-template-columns:1fr;padding:16px}
+  .sidebar{position:static;top:auto;height:auto;overflow:visible}
+  .main .hero{grid-template-columns:1fr}
+  .nav{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bar{grid-template-columns:120px minmax(140px,1fr) 90px}
+}
+@media (max-width:768px){
+  .header{padding:14px 14px 12px}
+  .brand h1{font-size:20px}
+  .brand p{font-size:12px}
+  .actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+  .btn{width:100%;padding:11px 12px}
+  .layout{padding:12px;gap:14px}
+  .panel-head,.panel-body,.section-head,.section-body,.hero-card,.scenario-box{padding-left:14px;padding-right:14px}
+  .section-head{flex-direction:column}
+  .hero-grid,.kpi-row,.grid-2,.grid-3,.grid-4,.metric-split,.sensitivity-grid{grid-template-columns:1fr}
+  .nav{grid-template-columns:1fr}
+  table{min-width:720px}
+  .bar{grid-template-columns:1fr;gap:8px}
+  .bar > div:last-child{text-align:left!important}
+  .mobile-anchor-bar{display:flex;gap:8px;overflow:auto;padding:0 0 2px;margin-top:12px;scrollbar-width:none}
+  .mobile-anchor-bar::-webkit-scrollbar{display:none}
+  .mobile-anchor-bar a{flex:0 0 auto;text-decoration:none;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:12px;font-weight:700}
+}
+@media (max-width:480px){
+  .actions{grid-template-columns:1fr}
+  .header{padding:12px}
+  .brand h1{font-size:18px}
+  .field input,.field select,.field textarea{font-size:16px}
+  .kpi .value,.kpi-mini .value,.stat .value{font-size:20px}
+  .hero-card h2{font-size:22px}
+}
+@media print{
+  .header,.sidebar,.screen-only,.footer-space,.mobile-anchor-bar{display:none!important}
+  .layout{display:block;padding:0}
+  .panel,.section,.hero-card,.scenario-box,.form-card{box-shadow:none!important;border:1px solid #d9dee7!important;background:#fff!important}
+  .report-only{display:block}
+}
+</style>
+</head>
+<body>
+<header class="header screen-only">
+  <div class="header-wrap">
+    <div class="brand">
+      <h1>QUẢN TRỊ TÀI CHÍNH ĐẦU TƯ MEDTECH HOPT</h1>
+      <p>Cho phép nhập linh hoạt chi phí cố định, chi phí biến đổi, doanh thu, hòa vốn, lợi nhuận và kết xuất PDF.</p>
+    </div>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="loadDefaultCase()">Nạp dữ liệu mẫu</button>
+      <button class="btn btn-secondary" onclick="resetAll()">Khôi phục trắng</button>
+      <button class="btn btn-light" onclick="window.print()">In nhanh</button>
+      <button class="btn btn-primary" onclick="exportPDF()">Xuất PDF</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout" id="appCapture">
+  <aside class="sidebar screen-only">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Cơ sở tính toán</h2>
+        <p>Từ file Phân tích Tài chính Chi tiết  ·  Điểm Hòa vốn  ·  ROI từng Giải pháp.</p>
+      </div>
+      <div class="panel-body nav">
+        <a href="#tongquan" class="active"><span class="dot" style="background:#0b5cab"></span>Tổng quan</a>
+        <a href="#congty"><span class="dot" style="background:#0f8b8d"></span>Chi phí công ty</a>
+        <a href="#duan1"><span class="dot" style="background:#0b5cab"></span>GP 1</a>
+        <a href="#duan2"><span class="dot" style="background:#10b981"></span>GP 2</a>
+        <a href="#duan3"><span class="dot" style="background:#7c3aed"></span>GP 3</a>
+        <a href="#duan4"><span class="dot" style="background:#d97706"></span>GP 4</a>
+        <a href="#tonghop"><span class="dot" style="background:#111827"></span>Tổng hợp P&L</a>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>KPI nhanh</h3></div>
+      <div class="panel-body">
+        <div class="kpi-mini"><div class="label">Doanh thu năm 1</div><div class="value" id="quickRevenue">0</div><div class="note">Tổng 4 dự án</div></div>
+        <div class="kpi-mini"><div class="label">EBITDA báo cáo</div><div class="value" id="quickProfit">0</div><div class="note">Sau fixed cost, variable cost, sales & marketing</div></div>
+        <div class="kpi-mini"><div class="label">Điểm hòa vốn</div><div class="value" id="quickBEP">0</div><div class="note">Doanh thu cần đạt / năm</div></div>
+        <div class="kpi-mini"><div class="label">Fixed cost / tháng</div><div class="value" id="quickFixed">0</div><div class="note">Lương + vận hành</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="hero" id="tongquan">
+      <div class="panel hero-card">
+        <h2>Mô hình tính toán tài chính đơn giản để vận hành</h2>
+        <p>Người dùng có thể tự nhập dữ liệu cho từng dự án theo đúng lộ trình 3 năm: Y1, Y2, Y3. Hệ thống tự động tách doanh thu thương mại và grant/tài trợ, tính gross profit, EBITDA báo cáo, lợi nhuận thuần thương mại, ROI, vốn đầu tư, điểm hòa vốn và tổng hợp P&amp;L toàn công ty cho giai đoạn 2026–2028.</p>
+        <div class="hero-grid">
+          <div class="stat"><div class="label">Số dự án</div><div class="value">4</div><div class="sub">Có thể đổi tên theo nhu cầu</div></div>
+          <div class="stat"><div class="label">Tính năng</div><div class="value">3 năm</div><div class="sub">P&amp;L, BEP, EBITDA, ROI</div></div>
+          <div class="stat"><div class="label">Đầu ra</div><div class="value">PDF</div><div class="sub">In hoặc lưu file</div></div>
+          <div class="stat"><div class="label">Lưu dữ liệu</div><div class="value">Auto</div><div class="sub">localStorage trên trình duyệt</div></div>
+        </div>
+      </div>
+      <div class="panel scenario-box screen-only">
+        <h3>Kịch bản vận hành</h3>
+        <p style="margin:10px 0 0;color:var(--muted);font-size:13px;line-height:1.6">Chọn hệ số điều chỉnh nhanh cho doanh thu và chi phí biến đổi. Phù hợp khi muốn xem base case, thận trọng, hoặc lạc quan.</p>
+        <div class="toggle-row" id="scenarioButtons">
+          <button class="pill active" data-s="1" onclick="setScenario(this,1,1)">Base</button>
+          <button class="pill" onclick="setScenario(this,0.85,1.05)">Thận trọng</button>
+          <button class="pill" onclick="setScenario(this,1.15,0.98)">Lạc quan</button>
+          <button class="pill" onclick="setScenario(this,0.7,1.1)">Stress test</button>
+        </div>
+        <div class="grid-2" style="margin-top:16px">
+          <div class="field"><label>Hệ số doanh thu</label><input id="revFactor" type="number" step="0.01" value="1"></div>
+          <div class="field"><label>Hệ số biến phí</label><input id="costFactor" type="number" step="0.01" value="1"></div>
+        </div>
+        <button class="btn btn-light" style="margin-top:14px" onclick="calculateAll()">Áp dụng kịch bản</button>
+      </div>
+    </section>
+
+    <section class="section panel" id="congty">
+      <div class="section-head">
+        <div>
+          <h3>1. Thông tin công ty và chi phí nền</h3>
+          <p>Nhập cấu trúc cố định dùng chung cho tất cả dự án.</p>
+        </div>
+        <span class="badge blue">Chi phí dùng chung</span>
+      </div>
+      <div class="section-body">
+        <div class="grid-3">
+          <div class="form-card">
+            <h4>Thông tin chung</h4>
+            <div class="grid-2">
+              <div class="field"><label>Tên doanh nghiệp</label><input id="companyName" value="MedTech HOPT"></div>
+              <div class="field"><label>Năm kế hoạch</label><input id="planYear" type="number" value="2026"></div>
+            </div>
+            <div class="grid-3" style="margin-top:12px">
+              <div class="field"><label>Vốn đầu tư năm 1</label><div class="unit"><input id="capexY1" type="number" value="2000"><span>M VND</span></div></div>
+              <div class="field"><label>Vốn đầu tư năm 2</label><div class="unit"><input id="capexY2" type="number" value="1500"><span>M VND</span></div></div>
+              <div class="field"><label>Vốn đầu tư năm 3</label><div class="unit"><input id="capexY3" type="number" value="500"><span>M VND</span></div></div>
+            </div>
+            <div class="note-box" style="margin-top:12px">Mặc định đang bám theo báo cáo DOCX 2026–2028. Có thể sửa bất kỳ ô nào để hệ thống tính lại ngay.</div>
+            <div class="field" style="margin-top:12px"><label>Ghi chú điều hành</label><textarea id="execNote" rows="4">Ưu tiên doanh thu sớm, bảo toàn dòng tiền, kiểm soát tuyển dụng và tận dụng cross-sell giữa các giải pháp.</textarea></div>
+          </div>
+          <div class="form-card">
+            <h4>Nhân sự và BHXH</h4>
+            <div class="grid-2">
+              <div class="field"><label>Số nhân sự</label><input id="headcount" type="number" value="10"></div>
+              <div class="field"><label>Tổng lương gross / tháng</label><div class="unit"><input id="grossSalary" type="number" value="143"><span>M</span></div></div>
+              <div class="field"><label>Tỷ lệ BHXH NSDLĐ</label><div class="unit"><input id="insuranceRate" type="number" value="22"><span>%</span></div></div>
+              <div class="field"><label>Fixed cost Y1</label><div class="unit"><input id="fixedY1" type="number" value="2838"><span>M</span></div><label style="margin-top:6px;font-size:11px;text-transform:none;letter-spacing:0;font-weight:700;color:var(--primary)"><input id="useFixedY1" type="checkbox" style="width:auto;min-height:auto;margin-right:8px"> Dùng override Y1</label></div>
+              <div class="field"><label>Fixed cost Y2</label><div class="unit"><input id="fixedY2" type="number" value="3263"><span>M</span></div><label style="margin-top:6px;font-size:11px;text-transform:none;letter-spacing:0;font-weight:700;color:var(--primary)"><input id="useFixedY2" type="checkbox" checked style="width:auto;min-height:auto;margin-right:8px"> Dùng override Y2</label></div>
+              <div class="field"><label>Fixed cost Y3</label><div class="unit"><input id="fixedY3" type="number" value="3831"><span>M</span></div><label style="margin-top:6px;font-size:11px;text-transform:none;letter-spacing:0;font-weight:700;color:var(--primary)"><input id="useFixedY3" type="checkbox" checked style="width:auto;min-height:auto;margin-right:8px"> Dùng override Y3</label></div>
+            </div>
+            <div class="note-box" style="margin-top:12px">Mặc định ứng dụng <strong>không khóa Y1 vào override</strong>, nên khi bạn sửa lương gross, BHXH hoặc chi phí vận hành tháng thì fixed cost Y1 và toàn bộ KPI sẽ cập nhật ngay. Y2 và Y3 giữ override theo DOCX để bám roadmap 3 năm, nhưng bạn có thể bỏ chọn nếu muốn dùng lại logic tự tính.</div>
+          </div>
+          <div class="form-card">
+            <h4>Chi phí vận hành / tháng</h4>
+            <div class="grid-2">
+              <div class="field"><label>Văn phòng</label><div class="unit"><input id="officeCost" type="number" value="25"><span>M</span></div></div>
+              <div class="field"><label>Điện nước Internet</label><div class="unit"><input id="utilityCost" type="number" value="5"><span>M</span></div></div>
+              <div class="field"><label>Cloud nền tảng</label><div class="unit"><input id="infraCost" type="number" value="8"><span>M</span></div></div>
+              <div class="field"><label>Tools & license</label><div class="unit"><input id="toolsCost" type="number" value="6"><span>M</span></div></div>
+              <div class="field"><label>Kế toán pháp lý</label><div class="unit"><input id="legalCost" type="number" value="8"><span>M</span></div></div>
+              <div class="field"><label>Chi phí khác</label><div class="unit"><input id="miscCost" type="number" value="10"><span>M</span></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="kpi-row" style="margin-top:16px">
+          <div class="kpi"><div class="label">Lương + BHXH / tháng</div><div class="value primary" id="kpiWageMonth">0</div><div class="note">Chi phí nhân sự thực chi</div></div>
+          <div class="kpi"><div class="label">Ops / tháng</div><div class="value" id="kpiOpsMonth">0</div><div class="note">VP, cloud, tools, pháp lý</div></div>
+          <div class="kpi"><div class="label">Fixed cost / tháng</div><div class="value red" id="kpiFixedMonth">0</div><div class="note">Dùng cho hòa vốn</div></div>
+          <div class="kpi"><div class="label">Fixed cost / năm</div><div class="value red" id="kpiFixedYear">0</div><div class="note">Năm 1</div></div>
+          <div class="kpi"><div class="label">Tỷ trọng lương</div><div class="value" id="kpiSalaryMix">0%</div><div class="note">Trên fixed cost</div></div>
+        </div>
+        <div class="note-box" style="margin-top:14px" id="fixedModeNote">Y1 đang tự tính từ lương + vận hành · Y2 override · Y3 override</div>
+      </div>
+    </section>
+
+    <div id="projectsContainer"></div>
+
+    <section class="section panel" id="tonghop">
+      <div class="section-head">
+        <div>
+          <h3>6. Tổng hợp doanh thu, chi phí và lợi nhuận</h3>
+          <p>Tổng hợp theo năm và theo dự án.</p>
+        </div>
+        <span class="badge green">Realtime</span>
+      </div>
+      <div class="section-body">
+        <div class="kpi-row">
+          <div class="kpi"><div class="label">Doanh thu năm 1</div><div class="value primary" id="sumRevY1">0</div><div class="note">Roadmap 2026</div></div>
+          <div class="kpi"><div class="label">Doanh thu năm 2</div><div class="value primary" id="sumRevY2">0</div><div class="note">Roadmap 2027</div></div>
+          <div class="kpi"><div class="label">Doanh thu năm 3</div><div class="value primary" id="sumRevY3">0</div><div class="note">Roadmap 2028</div></div>
+          <div class="kpi"><div class="label">Doanh thu hòa vốn</div><div class="value gold" id="sumBreakEven">0</div><div class="note">Toàn công ty / năm</div></div>
+          <div class="kpi"><div class="label">ROI lũy kế 3 năm</div><div class="value" id="sumROI3Y">0%</div><div class="note">Trên tổng vốn đầu tư</div></div>
+        </div>
+        <div class="kpi-row" style="margin-top:14px">
+          <div class="kpi"><div class="label">EBITDA năm 1</div><div class="value" id="sumOpY1">0</div><div class="note">Sau fixed + S&M</div></div>
+          <div class="kpi"><div class="label">EBITDA năm 2</div><div class="value" id="sumOpY2">0</div><div class="note">Sau fixed + S&M</div></div>
+          <div class="kpi"><div class="label">EBITDA năm 3</div><div class="value" id="sumOpY3">0</div><div class="note">Sau fixed + S&M</div></div>
+          <div class="kpi"><div class="label">EBITDA margin Y3</div><div class="value green" id="sumMarginY3">0%</div><div class="note">Mức trưởng thành mô hình</div></div>
+          <div class="kpi"><div class="label">Cash flow tích lũy</div><div class="value green" id="sumCash3Y">0</div><div class="note">Lợi nhuận + vốn đầu tư còn lại</div></div>
+        </div>
+        <div class="kpi-row" style="margin-top:14px">
+          <div class="kpi"><div class="label">Doanh thu thương mại Y1</div><div class="value primary" id="sumCommercialY1">0</div><div class="note">Không bao gồm grant</div></div>
+          <div class="kpi"><div class="label">Grant / tài trợ Y1</div><div class="value gold" id="sumGrantY1">0</div><div class="note">Nguồn ngoài thương mại</div></div>
+          <div class="kpi"><div class="label">EBITDA thuần thương mại Y1</div><div class="value" id="sumCommercialProfitY1">0</div><div class="note">Chỉ theo doanh thu thương mại</div></div>
+          <div class="kpi"><div class="label">EBITDA báo cáo Y1</div><div class="value" id="sumReportedEbitdaY1">0</div><div class="note">Thương mại + grant</div></div>
+          <div class="kpi"><div class="label">ROI năm 1</div><div class="value" id="sumROIY1">0%</div><div class="note">Trên vốn đầu tư năm 1</div></div>
+        </div>
+
+        <div class="table-wrap" style="margin-top:16px">
+          <table>
+            <thead>
+              <tr>
+                <th>Chỉ tiêu</th>
+                <th>Năm 1</th>
+                <th>Năm 2</th>
+                <th>Năm 3</th>
+              </tr>
+            </thead>
+            <tbody id="summaryTable"></tbody>
+          </table>
+        </div>
+
+        <div class="grid-2" style="margin-top:16px">
+          <div class="form-card">
+            <h4>Cơ cấu doanh thu theo dự án — Năm 1 (có thể dùng để mở rộng Y2/Y3)</h4>
+            <div class="bars" id="revenueBars"></div>
+          </div>
+          <div class="form-card">
+            <h4>Nhận định tự động</h4>
+            <div id="autoInsights" class="note-box"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section panel" id="dosens">
+      <div class="section-head">
+        <div>
+          <h3>4. Bảng độ nhạy theo báo cáo DOCX</h3>
+          <p>Tách riêng bảng độ nhạy tham chiếu theo báo cáo đầu tư 2026–2028 để so sánh nhanh giữa Base, Thận trọng và Stress, đồng thời vẫn giữ mô hình động cho phép người dùng tự cập nhật mọi trường.</p>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Kịch bản</th><th>Giả định chính</th><th>Revenue Y1</th><th>EBITDA Y1</th><th>Hòa vốn</th><th>Xác suất</th>
+              </tr>
+            </thead>
+            <tbody id="sensitivityTable">
+            </tbody>
+          </table>
+        </div>
+        <div class="sensitivity-grid" style="margin-top:16px">
+          <div class="sensitivity-card">
+            <h4>Base case</h4>
+            <p>Tài trợ 3,5 tỷ cho 2 giải pháp. Conversion theo kế hoạch trong báo cáo.</p>
+            <div class="big" id="sensBaseEbitda">0</div>
+            <p>EBITDA năm 1 tham chiếu.</p>
+          </div>
+          <div class="sensitivity-card">
+            <h4>Thận trọng</h4>
+            <p>Chỉ nhận 1 gói tài trợ và conversion thấp hơn 20% so với kế hoạch.</p>
+            <div class="big" id="sensConsEbitda">0</div>
+            <p>EBITDA năm 1 tham chiếu.</p>
+          </div>
+          <div class="sensitivity-card">
+            <h4>Stress test</h4>
+            <p>Không có tài trợ, conversion thấp hơn mạnh và cần thêm vốn.</p>
+            <div class="big" id="sensStressEbitda">0</div>
+            <p>EBITDA năm 1 tham chiếu.</p>
+          </div>
+          <div class="sensitivity-card">
+            <h4>Kịch bản hiện tại</h4>
+            <p>Tính động từ các trường bạn đang chỉnh sửa trong mô hình.</p>
+            <div class="big" id="sensCurrentEbitda">0</div>
+            <p>EBITDA báo cáo Y1 hiện tại.</p>
+          </div>
+        </div>
+        <div class="note-box warn" style="margin-top:16px">Trong bảng độ nhạy này, các số Base / Thận trọng / Stress được giữ đúng logic tham chiếu từ báo cáo DOCX để tiện so sánh. Kịch bản hiện tại bên phải là số động theo dữ liệu người dùng đang nhập.</div>
+      </div>
+    </section>
+
+    <div class="footer-space"></div>
+  </main>
+</div>
+
+<script>
+const STORAGE_KEY = 'financial_project_calculator_state_v5';
+const APP_VERSION = 'v5.0';
+let recalcTimer = null;
+const defaultProjects = [
+  { id:1, color:'#0b5cab', name:'GP1 - Tư vấn/Triển khai AI', unit:'dự án', year1Units:6, year2Units:9, year3Units:14, price:400, grantY1:0, otherRevenueY2:0, otherRevenueY3:0, directLabor:160, cloud:15, travel:10, outsource:20, support:0, setup:0, overrideVarY1:'', overrideVarY2:'', overrideVarY3:'', fixedAlloc:30, salesMarketingY1:75, salesMarketingY2:100, salesMarketingY3:140, note:'Giải pháp doanh thu sớm nhất, phù hợp nuôi dòng tiền.' },
+  { id:2, color:'#10b981', name:'GP2 - Telemedicine Agent', unit:'khách hàng', year1Units:5, year2Units:12, year3Units:22, price:125, grantY1:1000, otherRevenueY2:0, otherRevenueY3:0, directLabor:0, cloud:10, travel:0, outsource:0, support:12, setup:15, overrideVarY1:'', overrideVarY2:'', overrideVarY3:'', fixedAlloc:20, salesMarketingY1:45, salesMarketingY2:55, salesMarketingY3:70, note:'Có tài trợ năm 1 và recurring revenue từ năm 2.' },
+  { id:3, color:'#7c3aed', name:'GP3 - AI.DFS Dự báo dịch bệnh', unit:'CDC/năm', year1Units:0, year2Units:3, year3Units:8, price:200, grantY1:2500, otherRevenueY2:300, otherRevenueY3:800, directLabor:0, cloud:10, travel:0, outsource:0, support:20, setup:0, overrideVarY1:2000, overrideVarY2:270, overrideVarY3:240, fixedAlloc:30, salesMarketingY1:20, salesMarketingY2:35, salesMarketingY3:45, note:'Y1 thiên về R&D, doanh thu thương mại đến sau pilot.' },
+  { id:4, color:'#d97706', name:'GP4 - Giám sát thiết bị y tế', unit:'khách hàng tích lũy', year1Units:2.5, year2Units:6, year3Units:12, price:67, grantY1:0, otherRevenueY2:0, otherRevenueY3:0, directLabor:0, cloud:5, travel:0, outsource:0, support:4, setup:6, overrideVarY1:'', overrideVarY2:'', overrideVarY3:'', fixedAlloc:20, salesMarketingY1:25, salesMarketingY2:35, salesMarketingY3:55, note:'Recurring revenue và phù hợp cross-sell với GP1.' }
+];
+
+const sensitivityReference = [
+  { name:'Optimistic', assumption:'Nhận đủ tài trợ TP.HCM (3,5 tỷ). Conversion rate đúng hoặc nhỉnh hơn kế hoạch.', revenue:7500, ebitda:800, breakEven:'Q3/2026', probability:'25%' },
+  { name:'Base', assumption:'Tài trợ 3,5 tỷ cho 2 giải pháp. Conversion thực tế bằng kế hoạch.', revenue:6693, ebitda:202, breakEven:'Q2/2027', probability:'50%' },
+  { name:'Thận trọng', assumption:'Tài trợ chỉ 1 gói (GP2 hoặc GP3). Conversion thấp hơn 20% so với kế hoạch.', revenue:4000, ebitda:-600, breakEven:'Q4/2027', probability:'20%' },
+  { name:'Stress', assumption:'Không có tài trợ. Conversion thấp 40%.', revenue:2500, ebitda:-1500, breakEven:'Cần thêm vốn', probability:'5%' }
+];
+
+function el(id){ return document.getElementById(id); }
+function num(id){ return parseFloat(el(id)?.value || 0) || 0; }
+function fmtM(v){ if (!isFinite(v)) return '0'; return v >= 1000 ? (v/1000).toFixed(2).replace('.',',') + ' tỷ' : Math.round(v).toLocaleString('vi-VN') + ' M'; }
+function fmtPct(v){ return (isFinite(v) ? v : 0).toFixed(1).replace('.',',') + '%'; }
+function setText(id, value){ const node = el(id); if(node) node.textContent = value; }
+function setHTML(id, value){ const node = el(id); if(node) node.innerHTML = value; }
+function saveState(){
+  const data = { appVersion: APP_VERSION };
+  document.querySelectorAll('input, textarea, select').forEach(i => {
+    if(!i.id) return;
+    if(i.type === 'checkbox') data[i.id] = !!i.checked;
+    else data[i.id] = i.value;
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+function loadState(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return false;
+  try{
+    const data = JSON.parse(raw);
+    Object.keys(data).forEach(k => {
+      if(k === 'appVersion' || !el(k)) return;
+      if(el(k).type === 'checkbox') el(k).checked = !!data[k];
+      else el(k).value = data[k];
+    });
+    return true;
+  }catch(e){
+    console.warn('loadState failed', e);
+    return false;
+  }
+}
+function isOverrideActive(id){
+  return !!el(id)?.checked;
+}
+function clearAllSavedState(){
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem('financial_project_calculator_state');
+}
+function resetAll(){
+  clearAllSavedState();
+  location.reload();
+}
+function setScenario(button, rev, cost){
+  document.querySelectorAll('#scenarioButtons .pill').forEach(b=>b.classList.remove('active'));
+  button.classList.add('active');
+  el('revFactor').value = rev;
+  el('costFactor').value = cost;
+  calculateAll();
+}
+function buildProjectCards(){
+  const container = el('projectsContainer');
+  container.innerHTML = '';
+  defaultProjects.forEach((p, idx) => {
+    const sec = document.createElement('section');
+    sec.className = 'section panel';
+    sec.id = 'duan' + (idx+1);
+    sec.innerHTML = `
+      <div class="section-head">
+        <div>
+          <h3>${idx+2}. ${p.name}</h3>
+          <p>${p.note}</p>
+        </div>
+        <span class="badge" style="background:${p.color}15;color:${p.color}">Dự án ${idx+1}</span>
+      </div>
+      <div class="section-body">
+        <div class="grid-3">
+          <div class="form-card">
+            <h4>Doanh thu đầu vào</h4>
+            <div class="grid-2">
+              <div class="field"><label>Tên dự án</label><input id="p${p.id}_name" value="${p.name}"></div>
+              <div class="field"><label>Đơn vị bán</label><input id="p${p.id}_unit" value="${p.unit}"></div>
+              <div class="field"><label>Số lượng Y1</label><input id="p${p.id}_y1" type="number" step="0.1" value="${p.year1Units}"></div>
+              <div class="field"><label>Số lượng Y2</label><input id="p${p.id}_y2" type="number" step="0.1" value="${p.year2Units}"></div>
+              <div class="field"><label>Số lượng Y3</label><input id="p${p.id}_y3" type="number" step="0.1" value="${p.year3Units}"></div>
+              <div class="field"><label>Đơn giá / đơn vị</label><div class="unit"><input id="p${p.id}_price" type="number" value="${p.price}"><span>M VND</span></div></div>
+              <div class="field"><label>Doanh thu khác / tài trợ Y1</label><div class="unit"><input id="p${p.id}_grant1" type="number" value="${p.grantY1}"><span>M VND</span></div></div>
+              <div class="field"><label>Doanh thu khác Y2</label><div class="unit"><input id="p${p.id}_grant2" type="number" value="${p.otherRevenueY2 || 0}"><span>M VND</span></div></div>
+              <div class="field"><label>Doanh thu khác Y3</label><div class="unit"><input id="p${p.id}_grant3" type="number" value="${p.otherRevenueY3 || 0}"><span>M VND</span></div></div>
+              <div class="field"><label>Ghi chú</label><input id="p${p.id}_note" value="${p.note}"></div>
+            </div>
+          </div>
+          <div class="form-card">
+            <h4>Chi phí biến đổi / đơn vị</h4>
+            <div class="grid-2">
+              <div class="field"><label>Nhân sự trực tiếp</label><div class="unit"><input id="p${p.id}_labor" type="number" value="${p.directLabor}"><span>M</span></div></div>
+              <div class="field"><label>Setup / triển khai</label><div class="unit"><input id="p${p.id}_setup" type="number" value="${p.setup}"><span>M</span></div></div>
+              <div class="field"><label>Cloud / hạ tầng</label><div class="unit"><input id="p${p.id}_cloud" type="number" value="${p.cloud}"><span>M</span></div></div>
+              <div class="field"><label>Đi lại / demo</label><div class="unit"><input id="p${p.id}_travel" type="number" value="${p.travel}"><span>M</span></div></div>
+              <div class="field"><label>Thuê ngoài</label><div class="unit"><input id="p${p.id}_outsource" type="number" value="${p.outsource}"><span>M</span></div></div>
+              <div class="field"><label>Support / đào tạo</label><div class="unit"><input id="p${p.id}_support" type="number" value="${p.support}"><span>M</span></div></div>
+              <div class="field"><label>Biến phí Y1 override</label><div class="unit"><input id="p${p.id}_var1" type="number" value="${p.overrideVarY1 ?? ''}"><span>M VND</span></div><label style="margin-top:6px;font-size:11px;text-transform:none;letter-spacing:0;font-weight:700;color:var(--primary)"><input id="p${p.id}_useVar1" type="checkbox" ${p.id === 3 ? 'checked' : ''} style="width:auto;min-height:auto;margin-right:8px"> Dùng override Y1</label></div>
+              <div class="field"><label>Biến phí Y2 override</label><div class="unit"><input id="p${p.id}_var2" type="number" value="${p.overrideVarY2 ?? ''}"><span>M VND</span></div><label style="margin-top:6px;font-size:11px;text-transform:none;letter-spacing:0;font-weight:700;color:var(--primary)"><input id="p${p.id}_useVar2" type="checkbox" ${p.id === 3 ? 'checked' : ''} style="width:auto;min-height:auto;margin-right:8px"> Dùng override Y2</label></div>
+              <div class="field"><label>Biến phí Y3 override</label><div class="unit"><input id="p${p.id}_var3" type="number" value="${p.overrideVarY3 ?? ''}"><span>M VND</span></div><label style="margin-top:6px;font-size:11px;text-transform:none;letter-spacing:0;font-weight:700;color:var(--primary)"><input id="p${p.id}_useVar3" type="checkbox" ${p.id === 3 ? 'checked' : ''} style="width:auto;min-height:auto;margin-right:8px"> Dùng override Y3</label></div>
+            </div>
+          </div>
+          <div class="form-card">
+            <h4>Phân bổ và bán hàng</h4>
+            <div class="grid-2">
+              <div class="field"><label>Fixed cost phân bổ</label><div class="unit"><input id="p${p.id}_alloc" type="number" value="${p.fixedAlloc}"><span>%</span></div></div>
+              <div class="field"><label>S&M năm 1</label><div class="unit"><input id="p${p.id}_sm1" type="number" value="${p.salesMarketingY1}"><span>M</span></div></div>
+              <div class="field"><label>S&M năm 2</label><div class="unit"><input id="p${p.id}_sm2" type="number" value="${p.salesMarketingY2}"><span>M</span></div></div>
+              <div class="field"><label>S&M năm 3</label><div class="unit"><input id="p${p.id}_sm3" type="number" value="${p.salesMarketingY3}"><span>M</span></div></div>
+              <div class="field"><label>Ý nghĩa</label><select id="p${p.id}_type"><option value="commercial">Thương mại</option><option value="hybrid">Hybrid</option><option value="rnd">R&D/Grant</option></select></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-row" style="margin-top:16px">
+          <div class="kpi"><div class="label">Biến phí / đơn vị</div><div class="value" id="p${p.id}_varUnitView">0</div><div class="note">Tổng input variable cost</div></div>
+          <div class="kpi"><div class="label">Contribution / đơn vị</div><div class="value green" id="p${p.id}_contribView">0</div><div class="note">Đơn giá - biến phí</div></div>
+          <div class="kpi"><div class="label">Gross margin</div><div class="value primary" id="p${p.id}_gmView">0%</div><div class="note">Theo đơn vị</div></div>
+          <div class="kpi"><div class="label">BEP đơn vị / năm</div><div class="value gold" id="p${p.id}_bepUnitsView">0</div><div class="note">Hòa vốn riêng dự án</div></div>
+          <div class="kpi"><div class="label">Doanh thu hòa vốn</div><div class="value gold" id="p${p.id}_bepRevenueView">0</div><div class="note">Contribution based</div></div>
+        </div>
+
+        <div class="table-wrap" style="margin-top:16px">
+          <table>
+            <thead>
+              <tr>
+                <th>Chỉ tiêu</th>
+                <th>Năm 1</th>
+                <th>Năm 2</th>
+                <th>Năm 3</th>
+              </tr>
+            </thead>
+            <tbody id="p${p.id}_table"></tbody>
+          </table>
+        </div>
+      </div>`;
+    container.appendChild(sec);
+  });
+  el('p3_type').value = 'rnd';
+  el('p2_type').value = 'hybrid';
+}
+
+function computeFixed(){
+  const gross = num('grossSalary');
+  const insurance = num('insuranceRate') / 100;
+  const wageMonth = gross * (1 + insurance);
+  const opsMonth = num('officeCost') + num('utilityCost') + num('infraCost') + num('toolsCost') + num('legalCost') + num('miscCost');
+  const fixedMonth = wageMonth + opsMonth;
+  const autoFixedYear1 = fixedMonth * 12;
+  const fixedYear1 = isOverrideActive('useFixedY1') ? (num('fixedY1') || autoFixedYear1) : autoFixedYear1;
+  const fixedYear2 = isOverrideActive('useFixedY2') ? (num('fixedY2') || fixedYear1) : fixedYear1;
+  const fixedYear3 = isOverrideActive('useFixedY3') ? (num('fixedY3') || fixedYear2) : fixedYear2;
+
+  el('kpiWageMonth').textContent = fmtM(wageMonth);
+  el('kpiOpsMonth').textContent = fmtM(opsMonth);
+  el('kpiFixedMonth').textContent = fmtM(fixedMonth);
+  el('kpiFixedYear').textContent = fmtM(fixedYear1);
+  setText('fixedModeNote', `${isOverrideActive('useFixedY1') ? 'Y1 đang dùng override' : 'Y1 đang tự tính từ lương + vận hành'} · ${isOverrideActive('useFixedY2') ? 'Y2 override' : 'Y2 auto'} · ${isOverrideActive('useFixedY3') ? 'Y3 override' : 'Y3 auto'}`);
+  el('kpiSalaryMix').textContent = fmtPct((wageMonth / Math.max(fixedMonth, 1)) * 100);
+  el('quickFixed').textContent = fmtM(fixedMonth);
+  return { wageMonth, opsMonth, fixedMonth, fixedYears:[fixedYear1, fixedYear2, fixedYear3] };
+}
+
+function computeProject(id, fixedYears){
+  const revFactor = num('revFactor') || 1;
+  const costFactor = num('costFactor') || 1;
+  const price = num(`p${id}_price`) * revFactor;
+  const units = [num(`p${id}_y1`), num(`p${id}_y2`), num(`p${id}_y3`)];
+  const otherRevenue = [num(`p${id}_grant1`), num(`p${id}_grant2`), num(`p${id}_grant3`)];
+  const varUnit = (num(`p${id}_labor`) + num(`p${id}_setup`) + num(`p${id}_cloud`) + num(`p${id}_travel`) + num(`p${id}_outsource`) + num(`p${id}_support`)) * costFactor;
+  const contribution = price - varUnit;
+  const grossMargin = price > 0 ? contribution / price * 100 : 0;
+  const allocPct = num(`p${id}_alloc`) / 100;
+  const fixedAllocYears = fixedYears.map(v => v * allocPct);
+  const smYears = [num(`p${id}_sm1`), num(`p${id}_sm2`), num(`p${id}_sm3`)];
+
+  const revenueCommercial = units.map(u => u * price);
+  const revenueYears = units.map((u, idx) => revenueCommercial[idx] + otherRevenue[idx]);
+  const variableYears = units.map((u, idx) => {
+    const overrideId = `p${id}_var${idx+1}`;
+    const checkboxId = `p${id}_useVar${idx+1}`;
+    const override = el(overrideId)?.value;
+    const hasOverrideValue = override !== '' && override !== null && override !== undefined;
+    const useOverride = isOverrideActive(checkboxId) && hasOverrideValue;
+    return useOverride ? (parseFloat(override) || 0) : (u * varUnit);
+  });
+  const grantYears = [...otherRevenue];
+  const grossProfitCommercialYears = revenueCommercial.map((r, idx) => r - variableYears[idx]);
+  const grossProfitYears = revenueYears.map((r, idx) => r - variableYears[idx]);
+  const operatingCommercialYears = grossProfitCommercialYears.map((g, idx) => g - fixedAllocYears[idx] - smYears[idx]);
+  const operatingYears = grossProfitYears.map((g, idx) => g - fixedAllocYears[idx] - smYears[idx]);
+  const bepUnits = contribution > 0 ? fixedAllocYears[0] / contribution : 0;
+  const bepRevenue = bepUnits * price;
+
+  el(`p${id}_varUnitView`).textContent = fmtM(varUnit);
+  el(`p${id}_contribView`).textContent = fmtM(contribution);
+  el(`p${id}_gmView`).textContent = fmtPct(grossMargin);
+  el(`p${id}_bepUnitsView`).textContent = isFinite(bepUnits) ? bepUnits.toFixed(1).replace('.',',') : '0';
+  el(`p${id}_bepRevenueView`).textContent = fmtM(bepRevenue);
+
+  const tbody = el(`p${id}_table`);
+  const type = el(`p${id}_type`).value;
+  const typeBadge = type === 'rnd' ? '<span class="badge red">R&D</span>' : type === 'hybrid' ? '<span class="badge gold">Hybrid</span>' : '<span class="badge green">Commercial</span>';
+  tbody.innerHTML = `
+    <tr><td>Phân loại</td><td colspan="3">${typeBadge}</td></tr>
+    <tr><td>Số lượng bán</td><td>${units[0]}</td><td>${units[1]}</td><td>${units[2]}</td></tr>
+    <tr><td>Doanh thu thương mại</td><td>${fmtM(revenueCommercial[0])}</td><td>${fmtM(revenueCommercial[1])}</td><td>${fmtM(revenueCommercial[2])}</td></tr>
+    <tr><td>Tài trợ / doanh thu khác</td><td>${fmtM(otherRevenue[0])}</td><td>${fmtM(otherRevenue[1])}</td><td>${fmtM(otherRevenue[2])}</td></tr>
+    <tr><td>Tổng doanh thu</td><td>${fmtM(revenueYears[0])}</td><td>${fmtM(revenueYears[1])}</td><td>${fmtM(revenueYears[2])}</td></tr>
+    <tr><td>Biến phí</td><td>${fmtM(variableYears[0])} ${isOverrideActive(`p${id}_useVar1`) ? '<span class="badge blue">override</span>' : '<span class="badge green">auto</span>'}</td><td>${fmtM(variableYears[1])} ${isOverrideActive(`p${id}_useVar2`) ? '<span class="badge blue">override</span>' : '<span class="badge green">auto</span>'}</td><td>${fmtM(variableYears[2])} ${isOverrideActive(`p${id}_useVar3`) ? '<span class="badge blue">override</span>' : '<span class="badge green">auto</span>'}</td></tr>
+    <tr><td>Gross profit</td><td>${fmtM(grossProfitYears[0])}</td><td>${fmtM(grossProfitYears[1])}</td><td>${fmtM(grossProfitYears[2])}</td></tr>
+    <tr><td>Fixed cost phân bổ</td><td>${fmtM(fixedAllocYears[0])}</td><td>${fmtM(fixedAllocYears[1])}</td><td>${fmtM(fixedAllocYears[2])}</td></tr>
+    <tr><td>Sales & marketing</td><td>${fmtM(smYears[0])}</td><td>${fmtM(smYears[1])}</td><td>${fmtM(smYears[2])}</td></tr>
+    <tr class="total"><td>EBITDA báo cáo</td><td>${fmtM(operatingYears[0])}</td><td>${fmtM(operatingYears[1])}</td><td>${fmtM(operatingYears[2])}</td></tr>`;
+
+  return {
+    id,
+    name: el(`p${id}_name`).value,
+    revenueYears,
+    revenueCommercial,
+    grantYears,
+    variableYears,
+    grossProfitCommercialYears,
+    grossProfitYears,
+    operatingCommercialYears,
+    operatingYears,
+    fixedAllocYears,
+    smYears,
+    contribution,
+    grossMargin,
+    bepUnits,
+    bepRevenue
+  };
+}
+
+function calculateAll(){
+  try{
+    saveState();
+    const fixed = computeFixed();
+  const results = [1,2,3,4].map(i => computeProject(i, fixed.fixedYears));
+  const totalRevenue = [0,0,0];
+  const totalCommercialRevenue = [0,0,0];
+  const totalGrantRevenue = [0,0,0];
+  const totalVariable = [0,0,0];
+  const totalGrossCommercial = [0,0,0];
+  const totalGross = [0,0,0];
+  const totalSM = [0,0,0];
+  results.forEach(r => {
+    r.revenueYears.forEach((v,i)=> totalRevenue[i] += v);
+    r.revenueCommercial.forEach((v,i)=> totalCommercialRevenue[i] += v);
+    r.grantYears.forEach((v,i)=> totalGrantRevenue[i] += v);
+    r.variableYears.forEach((v,i)=> totalVariable[i] += v);
+    r.grossProfitCommercialYears.forEach((v,i)=> totalGrossCommercial[i] += v);
+    r.grossProfitYears.forEach((v,i)=> totalGross[i] += v);
+    r.smYears.forEach((v,i)=> totalSM[i] += v);
+  });
+  const operatingCommercial = totalCommercialRevenue.map((_,i) => totalGrossCommercial[i] - fixed.fixedYears[i] - totalSM[i]);
+  const operating = totalRevenue.map((_,i) => totalGross[i] - fixed.fixedYears[i] - totalSM[i]);
+  const grossMargin = totalRevenue.map((v,i)=> v>0 ? totalGross[i]/v*100 : 0);
+  const opMargin = totalRevenue.map((v,i)=> v>0 ? operating[i]/v*100 : 0);
+  const totalFixedAndSMY1 = fixed.fixedYears[0] + totalSM[0];
+  const avgGmY1 = totalRevenue[0] > 0 ? totalGross[0] / totalRevenue[0] : 0;
+  const breakEvenRevenue = avgGmY1 > 0 ? totalFixedAndSMY1 / avgGmY1 : 0;
+  const capex = [num('capexY1'), num('capexY2'), num('capexY3')];
+  const totalCapex = capex.reduce((a,b)=>a+b,0);
+  const cumulativeOperating = operating.reduce((a,b)=>a+b,0);
+  const roiY1 = capex[0] > 0 ? operating[0] / capex[0] * 100 : 0;
+  const roi3Y = totalCapex > 0 ? cumulativeOperating / totalCapex * 100 : 0;
+  const cumulativeCash = capex[0] + capex[1] + capex[2] + cumulativeOperating;
+
+  setText('sumRevY1', fmtM(totalRevenue[0]));
+  setText('sumRevY2', fmtM(totalRevenue[1]));
+  setText('sumRevY3', fmtM(totalRevenue[2]));
+  setText('sumCommercialY1', fmtM(totalCommercialRevenue[0]));
+  setText('sumGrantY1', fmtM(totalGrantRevenue[0]));
+  setText('sumCommercialProfitY1', fmtM(operatingCommercial[0]));
+  setText('sumReportedEbitdaY1', fmtM(operating[0]));
+  setText('sumROIY1', fmtPct(roiY1));
+  setText('sumOpY1', fmtM(operating[0]));
+  setText('sumOpY2', fmtM(operating[1]));
+  setText('sumOpY3', fmtM(operating[2]));
+  setText('sumMarginY3', fmtPct(opMargin[2]));
+  setText('sumBreakEven', fmtM(breakEvenRevenue));
+  setText('sumROI3Y', fmtPct(roi3Y));
+  setText('sumCash3Y', fmtM(cumulativeCash));
+  setText('quickRevenue', fmtM(totalRevenue[0]));
+  setText('quickProfit', fmtM(operating[0]));
+  setText('quickBEP', fmtM(breakEvenRevenue));
+
+  setHTML('summaryTable', `
+    <tr><td>Doanh thu thương mại</td><td>${fmtM(totalCommercialRevenue[0])}</td><td>${fmtM(totalCommercialRevenue[1])}</td><td>${fmtM(totalCommercialRevenue[2])}</td></tr>
+    <tr><td>Grant / tài trợ / doanh thu khác</td><td>${fmtM(totalGrantRevenue[0])}</td><td>${fmtM(totalGrantRevenue[1])}</td><td>${fmtM(totalGrantRevenue[2])}</td></tr>
+    <tr class="total"><td>Tổng doanh thu báo cáo</td><td>${fmtM(totalRevenue[0])}</td><td>${fmtM(totalRevenue[1])}</td><td>${fmtM(totalRevenue[2])}</td></tr>
+    <tr><td>Tổng biến phí</td><td>${fmtM(totalVariable[0])}</td><td>${fmtM(totalVariable[1])}</td><td>${fmtM(totalVariable[2])}</td></tr>
+    <tr><td>Gross profit thương mại</td><td>${fmtM(totalGrossCommercial[0])}</td><td>${fmtM(totalGrossCommercial[1])}</td><td>${fmtM(totalGrossCommercial[2])}</td></tr>
+    <tr><td>Gross profit báo cáo</td><td>${fmtM(totalGross[0])}</td><td>${fmtM(totalGross[1])}</td><td>${fmtM(totalGross[2])}</td></tr>
+    <tr><td>Gross margin báo cáo</td><td>${fmtPct(grossMargin[0])}</td><td>${fmtPct(grossMargin[1])}</td><td>${fmtPct(grossMargin[2])}</td></tr>
+    <tr><td>Fixed cost</td><td>${fmtM(fixed.fixedYears[0])}</td><td>${fmtM(fixed.fixedYears[1])}</td><td>${fmtM(fixed.fixedYears[2])}</td></tr>
+    <tr><td>Sales & marketing</td><td>${fmtM(totalSM[0])}</td><td>${fmtM(totalSM[1])}</td><td>${fmtM(totalSM[2])}</td></tr>
+    <tr><td>EBITDA thuần thương mại</td><td>${fmtM(operatingCommercial[0])}</td><td>${fmtM(operatingCommercial[1])}</td><td>${fmtM(operatingCommercial[2])}</td></tr>
+    <tr class="total"><td>EBITDA báo cáo</td><td>${fmtM(operating[0])}</td><td>${fmtM(operating[1])}</td><td>${fmtM(operating[2])}</td></tr>
+    <tr><td>Operating margin báo cáo</td><td>${fmtPct(opMargin[0])}</td><td>${fmtPct(opMargin[1])}</td><td>${fmtPct(opMargin[2])}</td></tr>
+    <tr><td>Vốn đầu tư</td><td>${fmtM(capex[0])}</td><td>${fmtM(capex[1])}</td><td>${fmtM(capex[2])}</td></tr>
+    <tr class="total"><td>ROI theo năm</td><td>${fmtPct(capex[0] > 0 ? operating[0]/capex[0]*100 : 0)}</td><td>${fmtPct(capex[1] > 0 ? operating[1]/capex[1]*100 : 0)}</td><td>${fmtPct(capex[2] > 0 ? operating[2]/capex[2]*100 : 0)}</td></tr>`);
+
+  const maxRev = Math.max(...results.map(r => r.revenueYears[0]), 1);
+  el('revenueBars').innerHTML = results.map(r => `
+    <div class="bar">
+      <div>${r.name}</div>
+      <div class="track"><div class="fill" style="width:${(r.revenueYears[0]/maxRev)*100}%;background:${defaultProjects.find(d=>d.id===r.id).color}"></div></div>
+      <div style="text-align:right;font-weight:700">${fmtM(r.revenueYears[0])}</div>
+    </div>`).join('');
+
+  const bestProject = results.slice().sort((a,b)=>b.operatingYears[0]-a.operatingYears[0])[0];
+  const weakestProject = results.slice().sort((a,b)=>a.operatingYears[0]-b.operatingYears[0])[0];
+  const insight = [];
+  insight.push(`Dự án đóng góp EBITDA báo cáo cao nhất ở năm 1 là <strong>${bestProject.name}</strong> với khoảng <strong>${fmtM(bestProject.operatingYears[0])}</strong>.`);
+  insight.push(`Dự án cần theo dõi nhiều nhất là <strong>${weakestProject.name}</strong> với EBITDA báo cáo năm 1 khoảng <strong>${fmtM(weakestProject.operatingYears[0])}</strong>.`);
+  insight.push(`Doanh thu thương mại năm 1 hiện là <strong>${fmtM(totalCommercialRevenue[0])}</strong>, trong khi grant/tài trợ năm 1 là <strong>${fmtM(totalGrantRevenue[0])}</strong>.`);
+  insight.push(`EBITDA thuần thương mại năm 1 hiện là <strong>${fmtM(operatingCommercial[0])}</strong>; EBITDA báo cáo năm 1 là <strong>${fmtM(operating[0])}</strong>.`);
+  insight.push(`Doanh thu hòa vốn toàn công ty hiện ước tính khoảng <strong>${fmtM(breakEvenRevenue)}</strong>/năm, tương đương khoảng <strong>${fmtM(breakEvenRevenue/12)}</strong>/tháng.`);
+  insight.push(`Mô hình đã cho phép sửa trực tiếp doanh thu khác, biến phí override, fixed cost từng năm và mọi trường đầu vào để bám sát thực tế vận hành.`);
+  if(operating[0] >= 0) insight.push(`Kịch bản hiện tại cho thấy công ty <strong>đang dương EBITDA báo cáo</strong> ở năm 1.`);
+  else insight.push(`Kịch bản hiện tại cho thấy công ty <strong>chưa đạt EBITDA báo cáo dương</strong> ở năm 1; nên xem lại sản lượng, giá bán hoặc phân bổ chi phí.`);
+  el('autoInsights').innerHTML = insight.join('<br><br>');
+
+  renderSensitivityTable(operating[0]);
+
+  window.lastCalculation = { fixed, results, totalRevenue, totalCommercialRevenue, totalGrantRevenue, totalVariable, totalGrossCommercial, totalGross, totalSM, operatingCommercial, operating, breakEvenRevenue, roiY1, roi3Y, cumulativeCash, grossMargin, opMargin, capex };
+  }catch(error){
+    console.error('calculateAll error', error);
+    setHTML('autoInsights', '<strong>Lỗi tính toán:</strong> ' + (error?.message || 'Không xác định') + '. Ứng dụng đã chặn lỗi để tránh toàn bộ KPI về 0. Hãy bấm Nạp dữ liệu mẫu nếu muốn phục hồi bộ dữ liệu chuẩn.');
+  }
+}
+
+function renderSensitivityTable(currentEbitdaY1){
+  const body = el('sensitivityTable');
+  if(body){
+    body.innerHTML = sensitivityReference.map(row => `
+      <tr class="${row.name==='Base' ? 'total' : ''}">
+        <td><span class="badge ${row.name==='Base'?'blue':row.name==='Thận trọng'?'gold':row.name==='Stress'?'red':'green'}">${row.name}</span></td>
+        <td>${row.assumption}</td>
+        <td>${fmtM(row.revenue)}</td>
+        <td>${fmtM(row.ebitda)}</td>
+        <td>${row.breakEven}</td>
+        <td>${row.probability}</td>
+      </tr>`).join('');
+  }
+  setText('sensBaseEbitda', fmtM(202));
+  setText('sensConsEbitda', fmtM(-600));
+  setText('sensStressEbitda', fmtM(-1500));
+  setText('sensCurrentEbitda', fmtM(currentEbitdaY1 || 0));
+}
+
+function applyDefaultCaseValues(){
+  const defaults = {
+    companyName:'MedTech HOPT',
+    planYear:'2026',
+    grossSalary:'143',
+    insuranceRate:'22',
+    officeCost:'25',
+    utilityCost:'5',
+    infraCost:'8',
+    toolsCost:'6',
+    legalCost:'8',
+    miscCost:'10',
+    fixedY1:'2838',
+    fixedY2:'3263',
+    fixedY3:'3831',
+    useFixedY1:false,
+    useFixedY2:true,
+    useFixedY3:true,
+    capexY1:'2000',
+    capexY2:'1500',
+    capexY3:'500',
+    revFactor:'1',
+    costFactor:'1'
+  };
+  Object.entries(defaults).forEach(([k,v]) => { if(!el(k)) return; if(el(k).type === 'checkbox') el(k).checked = !!v; else el(k).value = v; });
+  defaultProjects.forEach(p => {
+    const map = {
+      [`p${p.id}_name`]: p.name,
+      [`p${p.id}_unit`]: p.unit,
+      [`p${p.id}_y1`]: p.year1Units,
+      [`p${p.id}_y2`]: p.year2Units,
+      [`p${p.id}_y3`]: p.year3Units,
+      [`p${p.id}_price`]: p.price,
+      [`p${p.id}_grant1`]: p.grantY1,
+      [`p${p.id}_grant2`]: p.otherRevenueY2 || 0,
+      [`p${p.id}_grant3`]: p.otherRevenueY3 || 0,
+      [`p${p.id}_note`]: p.note,
+      [`p${p.id}_labor`]: p.directLabor,
+      [`p${p.id}_setup`]: p.setup,
+      [`p${p.id}_cloud`]: p.cloud,
+      [`p${p.id}_travel`]: p.travel,
+      [`p${p.id}_outsource`]: p.outsource,
+      [`p${p.id}_support`]: p.support,
+      [`p${p.id}_var1`]: p.overrideVarY1 ?? '',
+      [`p${p.id}_var2`]: p.overrideVarY2 ?? '',
+      [`p${p.id}_var3`]: p.overrideVarY3 ?? '',
+      [`p${p.id}_useVar1`]: p.id === 3,
+      [`p${p.id}_useVar2`]: p.id === 3,
+      [`p${p.id}_useVar3`]: p.id === 3,
+      [`p${p.id}_alloc`]: p.fixedAlloc,
+      [`p${p.id}_sm1`]: p.salesMarketingY1,
+      [`p${p.id}_sm2`]: p.salesMarketingY2,
+      [`p${p.id}_sm3`]: p.salesMarketingY3,
+      [`p${p.id}_type`]: p.id === 3 ? 'rnd' : (p.id === 2 ? 'hybrid' : 'commercial')
+    };
+    Object.entries(map).forEach(([k,v]) => { if(!el(k)) return; if(el(k).type === 'checkbox') el(k).checked = !!v; else el(k).value = v; });
+  });
+}
+function loadDefaultCase(){
+  clearAllSavedState();
+  applyDefaultCaseValues();
+  calculateAll();
+}
+
+async function exportPDF(){
+  calculateAll();
+  const btn = event?.target;
+  const old = btn ? btn.innerHTML : '';
+  if(btn){ btn.innerHTML = 'Đang tạo PDF...'; btn.disabled = true; }
+  try{
+    const { jsPDF } = window.jspdf;
+    const app = document.getElementById('appCapture');
+    const canvas = await html2canvas(app, { scale: 1.6, useCORS: true, backgroundColor: '#f4f7fb' });
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfW = pdf.internal.pageSize.getWidth();
+    const pdfH = pdf.internal.pageSize.getHeight();
+    const imgW = pdfW;
+    const imgH = canvas.height * imgW / canvas.width;
+    let heightLeft = imgH;
+    let position = 0;
+    const imgData = canvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
+    heightLeft -= pdfH;
+    while(heightLeft > 0){
+      position = heightLeft - imgH;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
+      heightLeft -= pdfH;
+    }
+    const name = (el('companyName').value || 'Financial_Calculator').replace(/\s+/g,'_');
+    const year = el('planYear').value || '2026';
+    pdf.save(`${name}_Financial_Calculator_${year}.pdf`);
+  }catch(e){
+    alert('Không thể tạo PDF. Hãy thử lại trên Chrome/Edge mới nhất.');
+    console.error(e);
+  } finally {
+    if(btn){ btn.innerHTML = old; btn.disabled = false; }
+  }
+}
+
+function scheduleRecalc(){
+  if(recalcTimer) window.cancelAnimationFrame(recalcTimer);
+  recalcTimer = window.requestAnimationFrame(() => {
+    recalcTimer = null;
+    calculateAll();
+  });
+}
+
+['input','change'].forEach(evt => {
+  document.addEventListener(evt, (e) => {
+    if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) scheduleRecalc();
+  });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  buildProjectCards();
+  const loaded = loadState();
+  if(!loaded) applyDefaultCaseValues();
+  calculateAll();
+});
+</script>
+</body>
+</html>

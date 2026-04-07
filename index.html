@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedTech HOPT - Chọn mô hình tính toán</title>
+  <style>
+    :root{
+      --bg:#eef3f8;
+      --card:#ffffff;
+      --line:#d8e2ee;
+      --text:#10243b;
+      --muted:#62758d;
+      --navy:#143a69;
+      --navy-2:#1d5aa6;
+      --teal:#0f9d94;
+      --soft:#f7fbff;
+      --shadow:0 18px 40px rgba(16,36,59,.10);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Arial,sans-serif;
+      color:var(--text);
+      background:linear-gradient(180deg,#f8fbfe 0%, var(--bg) 100%);
+    }
+    .wrap{max-width:1440px;margin:0 auto;padding:24px}
+    .hero{
+      background:linear-gradient(135deg,#0d2746 0%, #143a69 50%, #1d5aa6 100%);
+      color:#fff;
+      border-radius:28px;
+      padding:28px;
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+    }
+    .hero h1{margin:0 0 8px;font-size:clamp(28px,4vw,42px);line-height:1.08}
+    .hero p{margin:0;color:#d6e3f1;max-width:900px;line-height:1.6;font-size:15px}
+    .hero-grid{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:18px;
+      align-items:end;
+    }
+    .hero-actions{
+      display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end
+    }
+    .btn{
+      border:none;cursor:pointer;border-radius:14px;padding:12px 16px;
+      font-weight:700;font-size:14px;transition:.18s ease;min-height:46px
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:var(--teal);color:#fff}
+    .btn-secondary{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.16)}
+    .btn-light{background:#fff;color:var(--navy)}
+
+    .top-grid{
+      display:grid;
+      grid-template-columns:380px minmax(0,1fr);
+      gap:20px;
+      align-items:start;
+    }
+    .panel{
+      background:linear-gradient(180deg,#fff 0%, #fbfdff 100%);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .panel-body{padding:20px}
+    .panel h2,.panel h3{margin:0}
+    .panel-sub{margin:8px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
+
+    .model-list{display:grid;gap:14px;margin-top:18px}
+    .model-card{
+      padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--soft);
+      cursor:pointer;transition:.18s ease;position:relative;
+    }
+    .model-card:hover{border-color:#bfd2e8;transform:translateY(-1px)}
+    .model-card.active{background:#edf5ff;border-color:#8eb4de;box-shadow:inset 0 0 0 1px #8eb4de}
+    .model-badge{
+      display:inline-block;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:800;
+      text-transform:uppercase;letter-spacing:.04em;background:#eaf2fb;color:var(--navy)
+    }
+    .model-card h3{margin:12px 0 6px;font-size:18px}
+    .model-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.6}
+    .model-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .chip{
+      padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--line);
+      font-size:11px;font-weight:700;color:var(--muted)
+    }
+
+    .viewer-head{
+      display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;
+      padding:20px 20px 0;
+    }
+    .viewer-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .viewer-shell{padding:16px 20px 20px}
+    .frame-wrap{
+      background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;
+      min-height:78vh;
+    }
+    iframe{width:100%;height:78vh;border:none;background:#fff;display:block}
+
+    .foot-note{
+      margin-top:14px;color:var(--muted);font-size:12px;line-height:1.6
+    }
+
+    @media (max-width:1100px){
+      .top-grid{grid-template-columns:1fr}
+      .hero-grid{grid-template-columns:1fr}
+      .hero-actions{justify-content:flex-start}
+    }
+    @media (max-width:768px){
+      .wrap{padding:12px}
+      .hero{padding:18px;border-radius:22px}
+      .panel-body,.viewer-shell{padding:14px}
+      .viewer-head{padding:14px 14px 0}
+      .btn{width:100%}
+      .hero-actions,.viewer-actions{display:grid;grid-template-columns:1fr}
+      iframe{height:72vh}
+      .frame-wrap{min-height:72vh}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <h1>Quản trị tài chính đầu tư
+          <p>Thiết lập: Hoàng Thương - R&D Team</p>
+        </div>
+        <div class="hero-actions">
+          <button class="btn btn-light" onclick="selectModel('model1')">Mô  hình 1</button>
+          <button class="btn btn-primary" onclick="selectModel('model2')">Mô hình 2</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="top-grid">
+      <aside class="panel">
+        <div class="panel-body">
+          <h2>Chọn mô hình</h2>
+          <p class="panel-sub">Thiết kế đơn giản, chuyên nghiệp, dùng như một cổng điều hướng để chạy 2 công cụ tính toán riêng.</p>
+
+          <div class="model-list">
+            <div class="model-card active" id="card-model1" onclick="selectModel('model1')">
+              <span class="model-badge">Mô hình 1</span>
+              <h3>Tính nhanh theo từng giải pháp</h3>
+              <p>Phù hợp khi cần nhập nhanh một dự án/giải pháp và xem ngay doanh thu, EBITDA, BEP và xuất PDF.</p>
+              <div class="model-meta">
+                <span class="chip">Nhẹ</span>
+                <span class="chip">Nhanh</span>
+                <span class="chip">1 giải pháp / lần</span>
+              </div>
+            </div>
+
+            <div class="model-card" id="card-model2" onclick="selectModel('model2')">
+              <span class="model-badge" style="background:#e8faf7;color:#0f766e">Mô hình 2</span>
+              <h3>Quản trị tài chính 3 năm</h3>
+              <p>Phù hợp khi cần quản lý toàn bộ roadmap Y1-Y3, fixed cost, grant, doanh thu thương mại, EBITDA và P&amp;L tổng hợp.</p>
+              <div class="model-meta">
+                <span class="chip">Đầy đủ</span>
+                <span class="chip">3 năm</span>
+                <span class="chip">Dashboard</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="foot-note">
+            Gợi ý dùng nhanh:<br>
+            - <strong>Mô hình 1</strong>: phân tích riêng từng dự án.<br>
+            - <strong>Mô hình 2</strong>: lập kế hoạch tài chính tổng thể 2026-2028.
+          </div>
+        </div>
+      </aside>
+
+      <section class="panel">
+        <div class="viewer-head">
+          <div>
+            <h2 id="viewerTitle">Mô hình 1 - Tính nhanh theo từng giải pháp</h2>
+            <p class="panel-sub" id="viewerDesc">Đang hiển thị file index1.html.</p>
+          </div>
+          <div class="viewer-actions">
+            <button class="btn btn-secondary" style="background:#143a69;color:#fff" onclick="openCurrentInNewTab()">Mở tab mới</button>
+            <button class="btn btn-primary" onclick="reloadFrame()">Tải lại mô hình</button>
+          </div>
+        </div>
+        <div class="viewer-shell">
+          <div class="frame-wrap">
+            <iframe id="appFrame" src="index1.html" title="Mô hình tính toán"></iframe>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const models = {
+      model1: {
+        src: 'index1.html',
+        title: 'Mô hình 1 - Tính nhanh theo từng giải pháp',
+        desc: 'Đang hiển thị file index1.html.'
+      },
+      model2: {
+        src: 'index2.html',
+        title: 'Mô hình 2 - Quản trị tài chính 3 năm',
+        desc: 'Đang hiển thị file index2.html.'
+      }
+    };
+
+    let currentModel = 'model1';
+
+    function selectModel(modelKey){
+      currentModel = modelKey;
+      const model = models[modelKey];
+      document.getElementById('appFrame').src = model.src;
+      document.getElementById('viewerTitle').textContent = model.title;
+      document.getElementById('viewerDesc').textContent = model.desc;
+      document.querySelectorAll('.model-card').forEach(el => el.classList.remove('active'));
+      document.getElementById('card-' + modelKey).classList.add('active');
+    }
+
+    function openCurrentInNewTab(){
+      window.open(models[currentModel].src, '_blank');
+    }
+
+    function reloadFrame(){
+      const frame = document.getElementById('appFrame');
+      frame.src = frame.src;
+    }
+  </script>
+</body>
+</html>
