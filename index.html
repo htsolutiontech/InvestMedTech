@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Báo cáo đầu tư MedTech HOPT</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root { --hopt-blue: #003366; }
+    body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    
+    /* GIAO DIỆN NHẬP LIỆU */
+    .header { text-align: center; color: var(--hopt-blue); border-bottom: 2px solid var(--hopt-blue); padding-bottom: 10px; margin-bottom: 20px; }
+    .section-title { font-weight: bold; color: var(--hopt-blue); background: #f8f9fa; padding: 8px; margin: 15px 0; border-left: 4px solid var(--hopt-blue); display: block; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .input-box { display: flex; flex-direction: column; }
+    label { font-size: 12px; font-weight: bold; margin-bottom: 5px; }
+    input, select { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+    
+    /* DASHBOARD TRÊN WEB */
+    .dashboard { background: #1a2a3a; color: #2ecc71; padding: 20px; border-radius: 8px; margin-top: 20px; font-family: monospace; line-height: 1.6; }
+    .bep-highlight { color: #f1c40f; font-weight: bold; font-size: 1.2em; border-top: 1px solid #444; margin-top: 10px; padding-top: 10px; }
+
+    /* VÙNG IN PDF - THIẾT KẾ TRẮNG ĐEN ĐỂ CHỐNG MẤT DATA */
+    #pdf-area { display: none; padding: 30px; color: black !important; }
+    .pdf-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .pdf-table th, .pdf-table td { border: 1px solid #000; padding: 10px; text-align: left; font-size: 14px; }
+    .pdf-table th { background: #eee; width: 60%; }
+
+    .btn-action { width: 100%; background: #28a745; color: white; padding: 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h2>QUẢN TRỊ TÀI CHÍNH ĐẦU TƯ MEDTEH HOPT</h2>
+  </div>
+
+  <form id="calcForm">
+    <span class="section-title">I. THÔNG SỐ ĐẦU VÀO</span>
+    <div class="grid">
+      <div class="input-box">
+        <label>Dự án / Giải pháp</label>
+        <select id="project" onchange="applyPresets()">
+          <option value="GP1">GP1: Tư vấn & Triển khai AI</option>
+          <option value="GP2">GP2: Telemedicine Agent</option>
+          <option value="GP3">GP3: AI.DFS (Dự báo dịch)</option>
+          <option value="GP4">GP4: Giám sát Thiết bị</option>
+        </select>
+      </div>
+      <div class="input-box"><label>Số lượng (Hợp đồng)</label><input type="number" id="qty" value="1" oninput="updateCalculations()"></div>
+      <div class="input-box"><label>Định phí phân bổ (M)</label><input type="number" id="fix" oninput="updateCalculations()"></div>
+      <div class="input-box"><label>Ngân sách S&M (M)</label><input type="number" id="sm" oninput="updateCalculations()"></div>
+      <div class="input-box"><label>Đơn giá bán (M)</label><input type="number" id="price" oninput="updateCalculations()"></div>
+    </div>
+
+    <span class="section-title">II. CHI TIẾT BIẾN PHÍ</span>
+    <div class="grid">
+      <div class="input-box"><label>Nhân sự (M)</label><input type="number" id="c_lab" oninput="updateCalculations()"></div>
+      <div class="input-box"><label>Hạ tầng Cloud (M)</label><input type="number" id="c_cld" oninput="updateCalculations()"></div>
+      <div class="input-box"><label>Thiết bị IoT (M)</label><input type="number" id="c_hw" oninput="updateCalculations()"></div>
+      <div class="input-box"><label>Vận hành (M)</label><input type="number" id="c_ops" oninput="updateCalculations()"></div>
+    </div>
+
+    <div class="dashboard">
+      <div>> TỔNG DOANH THU: <span id="v_rev">0</span> M VND</div>
+      <div>> LỢI NHUẬN EBITDA: <span id="v_ebit">0</span> M VND</div>
+      <div class="bep-highlight" id="v_bep">> ĐIỂM HÒA VỐN (BEP): 0 ĐƠN VỊ</div>
+    </div>
+
+    <button type="button" class="btn-action" onclick="generatePDF()">XUẤT PDF BÁO CÁO  ĐẦU TƯ </button>
+  </form>
+</div>
+
+<div id="pdf-area">
+  <h2 style="text-align:center;">BÁO CÁO TÀI CHÍNH DỰ ÁN HOPT</h2>
+  <p style="text-align:right;">Ngày: <span id="p_date"></span></p>
+  
+  <table class="pdf-table">
+    <tr><th colspan="2" style="text-align:center; background:#003366; color:white;">DỮ LIỆU CHI TIẾT</th></tr>
+    <tr><td>Tên giải pháp</td><td id="p_proj"></td></tr>
+    <tr><td>Số lượng dự kiến</td><td id="p_qty"></td></tr>
+    <tr><td>Đơn giá (Triệu VND)</td><td id="p_price"></td></tr>
+    <tr><td>Định phí & S&M (Triệu VND)</td><td id="p_fixed_total"></td></tr>
+    <tr><td>Nhân sự triển khai (Triệu VND)</td><td id="p_lab"></td></tr>
+    <tr><td>Cloud & Infrastructure (Triệu VND)</td><td id="p_cld"></td></tr>
+    <tr><td>Thiết bị / Phần cứng (Triệu VND)</td><td id="p_hw"></td></tr>
+    <tr><td>Vận hành / Khác (Triệu VND)</td><td id="p_ops"></td></tr>
+    <tr style="background:#f9f9f9; font-weight:bold;"><td>TỔNG DOANH THU</td><td id="p_rev"></td></tr>
+    <tr style="background:#f9f9f9; font-weight:bold;"><td>LỢI NHUẬN EBITDA</td><td id="p_ebit"></td></tr>
+    <tr style="background:#003366; color:white; font-weight:bold;"><td>ĐIỂM HÒA VỐN (BEP)</td><td id="p_bep"></td></tr>
+  </table>
+  <p style="margin-top:40px; font-size:10px; text-align:center;">Bản quyền thuộc về HOPT © 2026</p>
+</div>
+
+<script>
+  const presets = {
+    "GP1": { p: 400, fix: 851, sm: 80, lab: 160, cld: 15, hw: 0, ops: 20 },
+    "GP2": { p: 125, fix: 568, sm: 60, lab: 15, cld: 10, hw: 0, ops: 7 },
+    "GP3": { p: 200, fix: 851, sm: 40, lab: 100, cld: 50, hw: 0, ops: 20 },
+    "GP4": { p: 67, fix: 568, sm: 20, lab: 0, cld: 5, hw: 6, ops: 2 }
+  };
+
+  function applyPresets() {
+    const d = presets[document.getElementById("project").value];
+    document.getElementById("price").value = d.p;
+    document.getElementById("fix").value = d.fix;
+    document.getElementById("sm").value = d.sm;
+    document.getElementById("c_lab").value = d.lab;
+    document.getElementById("c_cld").value = d.cld;
+    document.getElementById("c_hw").value = d.hw;
+    document.getElementById("c_ops").value = d.ops;
+    updateCalculations();
+  }
+
+  function updateCalculations() {
+    const q = parseFloat(document.getElementById("qty").value) || 0;
+    const p = parseFloat(document.getElementById("price").value) || 0;
+    const f = parseFloat(document.getElementById("fix").value) || 0;
+    const s = parseFloat(document.getElementById("sm").value) || 0;
+    const l = parseFloat(document.getElementById("c_lab").value) || 0;
+    const c = parseFloat(document.getElementById("c_cld").value) || 0;
+    const h = parseFloat(document.getElementById("c_hw").value) || 0;
+    const o = parseFloat(document.getElementById("c_ops").value) || 0;
+
+    const tvc = l + c + h + o;
+    const rev = q * p;
+    const ebitda = rev - tvc - f - s;
+    const bep = (p - (tvc/q)) > 0 ? Math.ceil((f + s) / (p - (tvc/q))) : "N/A";
+
+    // Dashboard
+    document.getElementById("v_rev").innerText = rev.toLocaleString();
+    document.getElementById("v_ebit").innerText = ebitda.toLocaleString();
+    document.getElementById("v_bep").innerText = "> ĐIỂM HÒA VỐN (BEP): " + bep + " ĐƠN VỊ";
+
+    // Ép dữ liệu vào bảng PDF tĩnh
+    document.getElementById("p_proj").innerText = document.getElementById("project").options[document.getElementById("project").selectedIndex].text;
+    document.getElementById("p_qty").innerText = q;
+    document.getElementById("p_price").innerText = p.toLocaleString();
+    document.getElementById("p_fixed_total").innerText = (f + s).toLocaleString();
+    document.getElementById("p_lab").innerText = l.toLocaleString();
+    document.getElementById("p_cld").innerText = c.toLocaleString();
+    document.getElementById("p_hw").innerText = h.toLocaleString();
+    document.getElementById("p_ops").innerText = o.toLocaleString();
+    document.getElementById("p_rev").innerText = rev.toLocaleString() + " M VND";
+    document.getElementById("p_ebit").innerText = ebitda.toLocaleString() + " M VND";
+    document.getElementById("p_bep").innerText = bep + " ĐƠN VỊ";
+    document.getElementById("p_date").innerText = new Date().toLocaleString('vi-VN');
+  }
+
+  function generatePDF() {
+    const element = document.getElementById('pdf-area');
+    element.style.display = 'block';
+    
+    const opt = {
+      margin: 10,
+      filename: 'Bao_Cao_HOPT_2026.pdf',
+      image: { type: 'jpeg', quality: 1 },
+      html2canvas: { scale: 3, letterRendering: true, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+      element.style.display = 'none';
+    });
+  }
+
+  window.onload = applyPresets;
+</script>
+</body>
+</html>
